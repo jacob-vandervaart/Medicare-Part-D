@@ -7,7 +7,7 @@ SELECT
   Gnrc_Name,
   Mftr_Name
 FROM
-  `clean-hangar-449116-q8.CMS.medicare_part_d`
+  `CMS.medicare_part_d`
 WHERE
   Mftr_Name = "Overall"
 ORDER BY
@@ -22,7 +22,7 @@ SELECT
   Gnrc_Name,
   Mftr_Name
 FROM
-  `clean-hangar-449116-q8.CMS.medicare_part_d`
+  `CMS.medicare_part_d`
 WHERE
   Mftr_Name = "Overall"
 ORDER BY
@@ -38,7 +38,7 @@ SELECT
   Mftr_Name,
   Avg_Spnd_Per_Clm_2022
 FROM
-  `clean-hangar-449116-q8.CMS.medicare_part_d`
+  `CMS.medicare_part_d`
 WHERE
   Mftr_Name = "Overall"
 ORDER BY
@@ -56,7 +56,7 @@ SELECT
   Tot_Benes_2022 AS bens2022,
   (Tot_Benes_2022 - Tot_Benes_2018) AS increase
 FROM
-  `clean-hangar-449116-q8.CMS.medicare_part_d`
+  `CMS.medicare_part_d`
 WHERE
   Mftr_Name = "Overall"
 ORDER BY
@@ -73,7 +73,7 @@ SELECT
   Tot_Benes_2022 AS bens2022,
   ((Tot_Benes_2022 - Tot_Benes_2018)/(Tot_Benes_2018)) AS pct_increase
 FROM
-  `clean-hangar-449116-q8.CMS.medicare_part_d`
+  `CMS.medicare_part_d`
 WHERE
   Tot_Benes_2018 > 100
   AND Tot_Benes_2022 >100
@@ -96,7 +96,7 @@ SELECT
   (Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018) AS increase,
   ((Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018)/(Avg_Spnd_Per_Clm_2018)) AS pct_increase
 FROM
-  `clean-hangar-449116-q8.CMS.medicare_part_d`
+  `CMS.medicare_part_d`
 WHERE
   Tot_Benes_2018 > 1000
   AND Tot_Benes_2022 >1000
@@ -116,7 +116,7 @@ END
   AVG(Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018) AS avg_increase,
   AVG((Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018)/Avg_Spnd_Per_Clm_2018) AS avg_pct_increase
 FROM
-  `clean-hangar-449116-q8.CMS.medicare_part_d`
+  `CMS.medicare_part_d`
 WHERE
   Avg_Spnd_Per_Clm_2018 <> 0
 GROUP BY
@@ -133,7 +133,7 @@ END
   AVG(Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018) AS avg_increase,
   AVG((Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018)/Avg_Spnd_Per_Clm_2018) AS avg_pct_increase
 FROM
-  `clean-hangar-449116-q8.CMS.medicare_part_d`
+  `CMS.medicare_part_d`
 WHERE
   Avg_Spnd_Per_Clm_2018 <> 0
 GROUP BY
@@ -156,9 +156,9 @@ WITH
     (Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018) AS increase,
     ((Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018)/(Avg_Spnd_Per_Clm_2018)) AS pct_increase
   FROM
-    `clean-hangar-449116-q8.CMS.medicare_part_d` cost
+    `CMS.medicare_part_d` cost
   JOIN
-    `clean-hangar-449116-q8.CMS.drug_descriptions` description
+    `CMS.drug_descriptions` description
   ON
     UPPER(cost.Brnd_Name) = description.`Drug Name` -- need TO ADD upper becuase drug description has ALL caps
   WHERE
