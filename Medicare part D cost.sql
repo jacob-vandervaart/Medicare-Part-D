@@ -63,6 +63,7 @@ ORDER BY
   increase DESC
 LIMIT
   20; 
+
 -- identify the drugs that had the largest percentage increase in number of beneficiaries from 2018 to 2022 
 -- limiting to drugs with more than 100 beneficiaries in 2018 and 2022
 SELECT
