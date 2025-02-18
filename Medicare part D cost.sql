@@ -203,3 +203,14 @@ FROM
   joined_data
 WHERE
   is_antipsychotic = TRUE;
+
+-- Pull data in a format for making a line graph
+SELECT 
+Brnd_Name,
+Gnrc_Name,
+cost, RIGHT(year,4) AS year 
+FROM `clean-hangar-449116-q8.CMS.medicare_part_d`
+UNPIVOT (cost FOR year IN (Avg_Spnd_Per_Clm_2018,Avg_Spnd_Per_Clm_2019,Avg_Spnd_Per_Clm_2020,Avg_Spnd_Per_Clm_2021,Avg_Spnd_Per_Clm_2022)) as unpivot
+WHERE Mftr_Name = "Overall"
+ORDER BY Brnd_Name
+
