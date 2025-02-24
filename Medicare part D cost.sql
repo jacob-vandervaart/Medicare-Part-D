@@ -1,150 +1,108 @@
-  -- Medicare Part D Drug spending 2018 - 2022 -- Jacob Van Der Vaart  
-  -- exploring drug leaders FOR various metrics -- identify top drugs BY number OF beneficiaries 2022
+/*
+Jacob Van Der Vaart
+Medicare Part D drug prices 2018 - 2022
+*/
 
-SELECT
-  Tot_Benes_2022 AS bens2022,
-  Brnd_Name,
-  Gnrc_Name,
-  Mftr_Name
-FROM
-  `CMS.medicare_part_d`
-WHERE
-  Mftr_Name = "Overall"
-ORDER BY
-  bens2022 DESC
-LIMIT
-  20; 
-  
--- identify top drugs BY number OF prescriptions 2022
+-- Find the top 20 most prescribed drugs and their cost increases
+
 SELECT
   Tot_Clms_2022 AS claims2022,
   Brnd_Name,
   Gnrc_Name,
-  Mftr_Name
+  Avg_Spnd_Per_Clm_2018,
+  Avg_Spnd_Per_Clm_2022,
+  Avg_Spnd_Per_Bene_2022 - Avg_Spnd_Per_Clm_2018 AS price_increase,
+  (Avg_Spnd_Per_Bene_2022 - Avg_Spnd_Per_Clm_2018)/Avg_Spnd_Per_Clm_2018 AS pct_increase
 FROM
   `CMS.medicare_part_d`
 WHERE
-  Mftr_Name = "Overall"
+  Mftr_Name = "Overall" AND
+  Avg_Spnd_Per_Clm_2018 <>0 AND 
+  Avg_Spnd_Per_Clm_2018 IS NOT NULL AND
+  Avg_Spnd_Per_Clm_2022 IS NOT NULL
 ORDER BY
   claims2022 DESC
 LIMIT
   20; 
-  
--- identify top drugs BY cost OF drug 2022
-SELECT
-  Tot_Spndng_2022,
-  Brnd_Name,
-  Gnrc_Name,
-  Mftr_Name,
-  Avg_Spnd_Per_Clm_2022
-FROM
-  `CMS.medicare_part_d`
-WHERE
-  Mftr_Name = "Overall"
-ORDER BY
-  Avg_Spnd_Per_Clm_2022 DESC
-LIMIT
-  20; 
 
--- Examen increases from 2018 TO 2022 
--- identify the drugs that had the largest increase IN number OF beneficiaries from 2018 TO 2022
+-- identify the drugs that had the largest absolute increase in price from 2018 to 2022 
+-- limiting to drugs with more than 200 beneficiaries in 2018 AND 2022
 SELECT
   Brnd_Name,
   Gnrc_Name,
-  Mftr_Name,
-  Tot_Benes_2018 AS bens2018,
-  Tot_Benes_2022 AS bens2022,
-  (Tot_Benes_2022 - Tot_Benes_2018) AS increase
+  Tot_Benes_2022,
+  Avg_Spnd_Per_Clm_2018 AS cost2018,
+  Avg_Spnd_Per_Clm_2022 AS cost2022,
+  Tot_Mftr,
+  (Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018) AS price_change,
+  ((Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018)/(Avg_Spnd_Per_Clm_2018))*100 AS pct_change
 FROM
   `CMS.medicare_part_d`
 WHERE
-  Mftr_Name = "Overall"
+  Tot_Benes_2018 > 200
+  AND Tot_Benes_2022 > 200
+  AND Mftr_Name = "Overall"AND 
+  Avg_Spnd_Per_Bene_2018 <> 0 AND 
+  Avg_Spnd_Per_Clm_2018 IS NOT NULL AND
+  Avg_Spnd_Per_Clm_2022 IS NOT NULL
 ORDER BY
-  increase DESC
+  price_change DESC
 LIMIT
-  20; 
+  10; 
 
--- identify the drugs that had the largest percentage increase in number of beneficiaries from 2018 to 2022 
--- limiting to drugs with more than 100 beneficiaries in 2018 and 2022
+-- Drugs with high cost increase all have high overall price and high percentage increase
+
+
+-- identify the drugs that had the largest percentage increase in price from 2018 to 2022 
+-- limiting to drugs with more than 200 beneficiaries in 2018 AND 2022
 SELECT
   Brnd_Name,
   Gnrc_Name,
-  Mftr_Name,
-  Tot_Benes_2018 AS bens2018,
-  Tot_Benes_2022 AS bens2022,
-  ((Tot_Benes_2022 - Tot_Benes_2018)/(Tot_Benes_2018)) AS pct_increase
-FROM
-  `CMS.medicare_part_d`
-WHERE
-  Tot_Benes_2018 > 100
-  AND Tot_Benes_2022 >100
-  AND Mftr_Name = "Overall"
-  AND Tot_Benes_2018 <> 0
-ORDER BY
-  pct_increase DESC
-LIMIT
-  20; 
-  
--- identify the drugs that had the largest percentage increase in number of price from 2018 to 2022 
--- limiting to drugs with more than 1000 beneficiaries in 2018 AND 2022
-SELECT
-  Brnd_Name,
-  Gnrc_Name,
-  Mftr_Name,
+  Tot_Benes_2022,
   Avg_Spnd_Per_Clm_2018 AS cost2018,
   Avg_Spnd_Per_Clm_2022 AS cost2022,
   Tot_Mftr,
   (Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018) AS increase,
-  ((Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018)/(Avg_Spnd_Per_Clm_2018)) AS pct_increase
+  ((Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018)/(Avg_Spnd_Per_Clm_2018))*100 AS pct_increase
 FROM
   `CMS.medicare_part_d`
 WHERE
-  Tot_Benes_2018 > 1000
-  AND Tot_Benes_2022 >1000
-  AND Mftr_Name = "Overall"AND Avg_Spnd_Per_Bene_2018 <> 0
+  Tot_Benes_2018 > 200
+  AND Tot_Benes_2022 > 200
+  AND Mftr_Name = "Overall"AND 
+  Avg_Spnd_Per_Bene_2018 <> 0 AND 
+  Avg_Spnd_Per_Clm_2018 IS NOT NULL AND
+  Avg_Spnd_Per_Clm_2022 IS NOT NULL
 ORDER BY
-  increase DESC; 
-  
--- Answer question does having more manufaturers lead To lower cost increases or to a decreas in price
-SELECT
-  CASE
-    WHEN Tot_Mftr = 1 THEN '1'
-    WHEN Tot_Mftr < 10 THEN '1-9'
-    ELSE '10+'
-END
-  AS mftr_group,
-  COUNT(*) AS count,
-  AVG(Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018) AS avg_increase,
-  AVG((Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018)/Avg_Spnd_Per_Clm_2018) AS avg_pct_increase
-FROM
-  `CMS.medicare_part_d`
-WHERE
-  Avg_Spnd_Per_Clm_2018 <> 0
-GROUP BY
-  mftr_group; 
+  pct_increase DESC
+LIMIT
+  20;
 
--- same analysis with a larger number of levels
+-- Answer question does having more manufaturers lead to higher price increases
 SELECT
   CASE
-    WHEN Tot_Mftr < 10 THEN CAST(Tot_Mftr AS STRING)
+    WHEN Tot_Mftr < 5 THEN CAST(Tot_Mftr AS STRING)
+    WHEN Tot_Mftr >5 AND Tot_Mftr < 10 THEN "5-9"
     ELSE "10+"
-END
-  AS mftr_group,
+  END AS mftr_group,
   COUNT(*) AS count,
-  AVG(Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018) AS avg_increase,
-  AVG((Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018)/Avg_Spnd_Per_Clm_2018) AS avg_pct_increase
+  AVG(Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018) AS avg_price_change,
+  SUM(Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018) / SUM(Avg_Spnd_Per_Clm_2018)*100 AS avg_pct_change
 FROM
   `CMS.medicare_part_d`
 WHERE
-  Avg_Spnd_Per_Clm_2018 <> 0
+  Avg_Spnd_Per_Clm_2018 <> 0 AND 
+  Avg_Spnd_Per_Clm_2018 IS NOT NULL AND
+  Avg_Spnd_Per_Clm_2022 IS NOT NULL
 GROUP BY
   mftr_group
 ORDER BY
   mftr_group; 
-  
--- Analyze what type of drugs are increasing the most in terms of prescriptions and cost 
+-- drugs with more than 4 manufatureres showed price decreases while all others showed increases in price
 
--- CTE to merge data and calculate price increase and percentage increase
+
+-- Analyze what type of drugs are increasing the most in cost 
+-- Use CTE to merge data and calculate price increase and percentage increase
 WITH
   joined_data AS (
   SELECT
@@ -154,24 +112,29 @@ WITH
     `LA Opioid Flag` AS is_long_acting,
     `Antibiotic Flag` AS is_antibiotic,
     `Antipsychotic Flag` AS is_antipsychotic,
-    (Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018) AS increase,
-    ((Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018)/(Avg_Spnd_Per_Clm_2018)) AS pct_increase
+    Avg_Spnd_Per_Clm_2018,
+    Avg_Spnd_Per_Clm_2022,
+    (Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018) AS price_change,
+    (Avg_Spnd_Per_Clm_2022 - Avg_Spnd_Per_Clm_2018)/(Avg_Spnd_Per_Clm_2018)*100 AS pct_change
   FROM
     `CMS.medicare_part_d` cost
   JOIN
     `CMS.drug_descriptions` description
   ON
-    UPPER(cost.Brnd_Name) = description.`Drug Name` -- need TO ADD upper becuase drug description has ALL caps
+    UPPER(cost.Brnd_Name) = description.`Drug Name` -- need to add upper becuase drug description has drug name in all caps
   WHERE
     Avg_Spnd_Per_Clm_2018 <> 0
-    AND Avg_Spnd_Per_Clm_2022 <> 0
-    AND Mftr_Name = 'Overall' ) 
-    
--- Average for all categories
-SELECT
+    AND Avg_Spnd_Per_Clm_2022 <> 0 AND 
+    Avg_Spnd_Per_Clm_2018 IS NOT NULL AND
+    Avg_Spnd_Per_Clm_2022 IS NOT NULL
+    AND Mftr_Name = 'Overall' )
+
+  SELECT
   'Opioid' AS category,
-  ROUND(AVG(increase),2) AS avg_cost_increase,
-  ROUND(AVG(joined_data.pct_increase)*100,2) AS average_pct_increase
+  AVG(Avg_Spnd_Per_Clm_2018) AS avg_cost_2018,
+  AVG(Avg_Spnd_Per_Clm_2022) AS avg_cost_2022,
+  ROUND(AVG(price_change),2) AS avg_price_change,
+  ROUND(AVG(pct_change),2) AS average_pct_change
 FROM
   joined_data
 WHERE
@@ -179,8 +142,10 @@ WHERE
 UNION ALL
 SELECT
   'Long-Acting Opioid',
-  ROUND(AVG(increase),2) AS avg_cost_increase,
-  ROUND(AVG(joined_data.pct_increase)*100,2) AS average_pct_increase
+  AVG(Avg_Spnd_Per_Clm_2018) AS avg_cost_2018,
+  AVG(Avg_Spnd_Per_Clm_2022) AS avg_cost_2022,
+  ROUND(AVG(price_change),2) AS avg_price_change,
+  ROUND(AVG(pct_change),2) AS average_pct_change
 FROM
   joined_data
 WHERE
@@ -188,8 +153,10 @@ WHERE
 UNION ALL
 SELECT
   'Antibiotic',
-  ROUND(AVG(increase),2) AS avg_cost_increase,
-  ROUND(AVG(joined_data.pct_increase)*100,2) AS average_pct_increase
+  AVG(Avg_Spnd_Per_Clm_2018) AS avg_cost_2018,
+  AVG(Avg_Spnd_Per_Clm_2022) AS avg_cost_2022,
+  ROUND(AVG(price_change),2) AS avg_price_change,
+  ROUND(AVG(pct_change),2) AS average_pct_change
 FROM
   joined_data
 WHERE
@@ -197,20 +164,36 @@ WHERE
 UNION ALL
 SELECT
   'Antipsychotic',
-  ROUND(AVG(increase),2) AS avg_cost_increase,
-  ROUND(AVG(joined_data.pct_increase)*100,2) AS average_pct_increase
+  AVG(Avg_Spnd_Per_Clm_2018) AS avg_cost_2018,
+  AVG(Avg_Spnd_Per_Clm_2022) AS avg_cost_2022,
+  ROUND(AVG(price_change),2) AS avg_price_change,
+  ROUND(AVG(pct_change),2) AS average_pct_change
 FROM
   joined_data
 WHERE
   is_antipsychotic = TRUE;
 
--- Pull data in a format for making a line graph
-SELECT 
-Brnd_Name,
-Gnrc_Name,
-cost, RIGHT(year,4) AS year 
-FROM `clean-hangar-449116-q8.CMS.medicare_part_d`
-UNPIVOT (cost FOR year IN (Avg_Spnd_Per_Clm_2018,Avg_Spnd_Per_Clm_2019,Avg_Spnd_Per_Clm_2020,Avg_Spnd_Per_Clm_2021,Avg_Spnd_Per_Clm_2022)) as unpivot
-WHERE Mftr_Name = "Overall"
-ORDER BY Brnd_Name
 
+
+-- Find percentage change in price per claim from 2018
+-- only take the top 20 drugs in terms of total spending in 2018
+SELECT 
+  Brnd_Name,
+  Gnrc_Name,
+  cost, 
+  RIGHT(year,4) AS year 
+FROM (
+  SELECT *,
+  1.0 AS pct_change_2018,
+  Avg_Spnd_Per_Clm_2019/Avg_Spnd_Per_Clm_2018 AS pct_change_2019,
+  Avg_Spnd_Per_Clm_2020/Avg_Spnd_Per_Clm_2018 AS pct_change_2020,
+  Avg_Spnd_Per_Clm_2021/Avg_Spnd_Per_Clm_2018 AS pct_change_2021,
+  Avg_Spnd_Per_Clm_2022/Avg_Spnd_Per_Clm_2018 AS pct_change_2022,
+  FROM `CMS.medicare_part_d`
+  WHERE Mftr_Name = "Overall" AND
+  Avg_Spnd_Per_Clm_2018 <>0 
+  ORDER BY Tot_Spndng_2018 DESC
+  LIMIT 20 
+)
+UNPIVOT (cost FOR year IN (pct_change_2018,pct_change_2019, pct_change_2020, pct_change_2021, pct_change_2022)) as unpivot
+ORDER BY Brnd_Name, year;
